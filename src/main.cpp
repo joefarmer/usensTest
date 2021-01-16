@@ -1,4 +1,7 @@
 #include <Arduino.h>
+
+//Very much stolen/borrowed from https://github.com/patrickpoirier51/POC 
+
 // ---------------------------------------------------------------------------
 // Example NewPing library sketch that does a ping about 20 times per second.
 // ---------------------------------------------------------------------------
