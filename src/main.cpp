@@ -113,7 +113,7 @@ void command_distance(int s) {
   uint16_t current_distance = (s == 0) ? sonar0.ping_cm() : sonar1.ping_cm(); /*< Current distance reading*/
   uint8_t type = 0; /*< Type from MAV_DISTANCE_SENSOR enum.*/
   uint8_t id = s + 1; /*< Onboard ID of the sensor*/
-  uint8_t orientation = 0; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
+  uint8_t orientation = (s == 0) ? 1 : 7; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
 // Consumed within ArduPilot by the proximity class
 
   uint8_t covariance = 0; /*< Measurement covariance in centimeters, 0 for unknown / invalid readings*/
@@ -124,7 +124,7 @@ void command_distance(int s) {
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
   // Pack the message
- mavlink_msg_distance_sensor_pack(sysid,compid,&msg,time_boot_ms,min_distance,max_distance,current_distance,type,id,orientation,covariance,0,0,0);
+ mavlink_msg_distance_sensor_pack(sysid,compid,&msg,time_boot_ms,min_distance,max_distance,current_distance,type,id,orientation,covariance,70,70,0);
 
   // Copy the message to the send buffer
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
