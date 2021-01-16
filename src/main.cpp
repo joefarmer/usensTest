@@ -54,9 +54,10 @@ const int Scale = 10;
 #define ECHO_PIN     PB8  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
-NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
+NewPing sonar0(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
+NewPing sonar1(PB4, PB3, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 void command_heartbeat();
-void command_distance_1();
+void command_distance(int s);
 
 void setup() {
   //Serial.begin(115200); // Open serial monitor at 115200 baud to see ping results.
@@ -64,13 +65,9 @@ void setup() {
 }
 
 void loop() {
-  // delay(150);                     // Wait 50ms between pings (about 20 pings/sec). 29ms should be the shortest delay between pings.
-  // Serial.print("Ping: ");
-  // Serial.print(sonar.ping_cm()); // Send ping, get distance in cm and print result (0 = outside set distance range)
-  // Serial.println("cm");
-
   command_heartbeat();
-  command_distance_1();
+  command_distance(0);
+  command_distance(1);
 }
 
 void command_heartbeat() {
@@ -103,12 +100,7 @@ void command_heartbeat() {
   Serial1.write(buf, len);
 }
 
-void command_distance_1() {
-
-// // READ THE DISTANCE SENSOR
-//   float Sensor1Smooth  = Sensor1.readRangeSingleMillimeters();
-//   Sensor1Smooth = constrain(Sensor1Smooth, MIN , MAX);
-//   float dist1 = Sensor1Smooth / Scale;
+void command_distance(int s) {
 
   //MAVLINK DISTANCE MESSAGE
   int sysid = 1;                   
@@ -118,9 +110,9 @@ void command_distance_1() {
   uint32_t time_boot_ms = 0; /*< Time since system boot*/
   uint16_t min_distance = 25; /*< Minimum distance the sensor can measure in centimeters*/
   uint16_t max_distance = 200; /*< Maximum distance the sensor can measure in centimeters*/
-  uint16_t current_distance = sonar.ping_cm(); /*< Current distance reading*/
+  uint16_t current_distance = (s == 0) ? sonar0.ping_cm() : sonar1.ping_cm(); /*< Current distance reading*/
   uint8_t type = 0; /*< Type from MAV_DISTANCE_SENSOR enum.*/
-  uint8_t id = 1; /*< Onboard ID of the sensor*/
+  uint8_t id = s + 1; /*< Onboard ID of the sensor*/
   uint8_t orientation = 0; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
 // Consumed within ArduPilot by the proximity class
 
