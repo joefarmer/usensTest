@@ -37,6 +37,8 @@ def send_distance_message(dist):
 
 #include <NewPing.h>
 
+HardwareSerial Serial3(PA3, PA2);
+
 const int MIN = 25;
 const int idle = 200;
 /*
@@ -60,8 +62,8 @@ void command_heartbeat();
 void command_distance(int s);
 
 void setup() {
-  //Serial.begin(115200); // Open serial monitor at 115200 baud to see ping results.
-  Serial1.begin(bRate);
+  Serial3.begin(115200); // Open serial monitor at 115200 baud to see ping results.
+  //Serial1.begin(bRate);
 }
 
 void loop() {
@@ -97,7 +99,7 @@ void command_heartbeat() {
   
   // Send the message 
   //delay(1);
-  Serial1.write(buf, len);
+  Serial3.write(buf, len);
 }
 
 void command_distance(int s) {
@@ -130,5 +132,5 @@ void command_distance(int s) {
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
   // Send the message (.write sends as bytes) 
   //delay(1);
-  Serial1.write(buf, len);
+  Serial3.write(buf, len);
 }
