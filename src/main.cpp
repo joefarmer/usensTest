@@ -58,6 +58,7 @@ const int Scale = 10;
 
 NewPing sonar0(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 NewPing sonar1(PB4, PB3, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
+NewPing sonar2(PB15, PB14, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 void command_heartbeat();
 void command_distance(int s);
 
@@ -70,6 +71,7 @@ void loop() {
   command_heartbeat();
   command_distance(0);
   command_distance(1);
+  command_distance(2);
 }
 
 void command_heartbeat() {
@@ -102,6 +104,15 @@ void command_heartbeat() {
   Serial3.write(buf, len);
 }
 
+uint32_t time_boot_ms = 0; /*< Time since system boot*/
+uint16_t min_distance = 25; /*< Minimum distance the sensor can measure in centimeters*/
+uint16_t max_distance = 200; /*< Maximum distance the sensor can measure in centimeters*/
+uint16_t current_distance = max_distance; /*< Current distance reading*/
+uint8_t type = 0; /*< Type from MAV_DISTANCE_SENSOR enum.*/
+uint8_t id = 0; /*< Onboard ID of the sensor*/
+uint8_t orientation = 0; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
+uint8_t covariance = 0; /*< Measurement covariance in centimeters, 0 for unknown / invalid readings*/
+
 void command_distance(int s) {
 
   //MAVLINK DISTANCE MESSAGE
@@ -109,17 +120,23 @@ void command_distance(int s) {
   //< The component sending the message.
   int compid = 158;    
 
-  uint32_t time_boot_ms = 0; /*< Time since system boot*/
-  uint16_t min_distance = 25; /*< Minimum distance the sensor can measure in centimeters*/
-  uint16_t max_distance = 200; /*< Maximum distance the sensor can measure in centimeters*/
-  uint16_t current_distance = (s == 0) ? sonar0.ping_cm() : sonar1.ping_cm(); /*< Current distance reading*/
-  uint8_t type = 0; /*< Type from MAV_DISTANCE_SENSOR enum.*/
-  uint8_t id = s + 1; /*< Onboard ID of the sensor*/
-  uint8_t orientation = (s == 0) ? 1 : 7; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
-// Consumed within ArduPilot by the proximity class
-
-  uint8_t covariance = 0; /*< Measurement covariance in centimeters, 0 for unknown / invalid readings*/
-
+  switch(s) {
+    case 0: 
+      current_distance = sonar0.ping_cm(); /*< Current distance reading*/
+      id = s + 1; /*< Onboard ID of the sensor*/
+      orientation = 7; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
+      break;
+    case 1: 
+      current_distance = sonar1.ping_cm(); /*< Current distance reading*/
+      id = s + 1; /*< Onboard ID of the sensor*/
+      orientation = 0; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
+      break;
+    case 2: 
+      current_distance = sonar2.ping_cm(); /*< Current distance reading*/
+      id = s + 1; /*< Onboard ID of the sensor*/
+      orientation = 1; /*(0=forward, each increment is 45degrees more in clockwise direction), 24 (upwards) or 25 (downwards)*/
+      break;
+  }
 
   // Initialize the required buffers
   mavlink_message_t msg;
