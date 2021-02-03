@@ -39,19 +39,6 @@ def send_distance_message(dist):
 
 HardwareSerial Serial3(PA3, PA2);
 
-const int MIN = 25;
-const int idle = 200;
-/*
-Valid values are (even numbers only):
-Pre: 12 to 18 (initialized to 14 by default)
-Final: 8 to 14 (initialized to 10 by default)
-*/
-const int PreRng = 18;  
-const int PostRng = 14;
-
-const int Scale = 10;
-#define bRate 115200
-
 #define TRIGGER_PIN  PB9  // Arduino pin tied to trigger pin on the ultrasonic sensor.
 #define ECHO_PIN     PB8  // Arduino pin tied to echo pin on the ultrasonic sensor.
 #define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
@@ -68,7 +55,7 @@ void setup() {
 }
 
 void loop() {
-  command_heartbeat();
+  //command_heartbeat();
   command_distance(0);
   command_distance(1);
   command_distance(2);
@@ -118,7 +105,7 @@ void command_distance(int s) {
   //MAVLINK DISTANCE MESSAGE
   int sysid = 1;                   
   //< The component sending the message.
-  int compid = 158;    
+  int compid = MAV_COMP_ID_PERIPHERAL;    
 
   switch(s) {
     case 0: 
@@ -143,7 +130,7 @@ void command_distance(int s) {
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
   // Pack the message
- mavlink_msg_distance_sensor_pack(sysid,compid,&msg,time_boot_ms,min_distance,max_distance,current_distance,type,id,orientation,covariance,70,70,0);
+ mavlink_msg_distance_sensor_pack(sysid,compid,&msg,time_boot_ms,min_distance,max_distance,current_distance,type,id,orientation,covariance,45,15,0);
 
   // Copy the message to the send buffer
   uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
